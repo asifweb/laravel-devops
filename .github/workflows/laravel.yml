@@ -21,7 +21,7 @@ jobs:
 
       - name: Copy files to Azure VM
         run: |
-          rsync -avz --no-times -e "ssh -o StrictHostKeyChecking=no" ./ asifalvi@${{ secrets.AZURE_VM_IP }}:/var/www/html/
+          rsync -avz --log-file=rsync.log --no-times -e "ssh -o StrictHostKeyChecking=no" ./ asifalvi@${{ secrets.AZURE_VM_IP }}:/var/www/html/laravel-devops
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2 # Use a stable version tag
