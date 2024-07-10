@@ -14,9 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Print Azure IP
-        run: ${{ secrets.AZURE_VM_IP }}
-
       - name: Setup SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
@@ -27,7 +24,7 @@ jobs:
           rsync -avz -e "ssh -o StrictHostKeyChecking=no" ./ asifalvi@${{ secrets.AZURE_VM_IP }}:/var/www/html/
 
       - name: Set up PHP
-        uses: shivammathur/setup-php@15c43e89cdef867065b0213be354c2841860869e
+        uses: shivammathur/setup-php@v2 # Use a stable version tag
         with:
           php-version: "7.4"
 
@@ -56,13 +53,15 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_IP }} 'sudo systemctl restart apache2'
 
+      # Optional: Create Database (if needed)
       # - name: Create Database
-      # run: |
-      # mkdir -p database
-      # touch database/database.sqlite
+      #   run: |
+      #     mkdir -p database
+      #     touch database/database.sqlite
 
+      # Optional: Execute tests (Unit and Feature tests) via PHPUnit/Pest (Uncomment if you need testing)
       # - name: Execute tests (Unit and Feature tests) via PHPUnit/Pest
-      # env:
-      # DB_CONNECTION: sqlite
-      # DB_DATABASE: database/database.sqlite
-      # run: php artisan test
+      #   env:
+      #     DB_CONNECTION: sqlite
+      #     DB_DATABASE: database/database.sqlite
+      #   run: php artisan test
