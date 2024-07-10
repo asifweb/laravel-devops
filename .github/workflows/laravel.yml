@@ -50,8 +50,8 @@ jobs:
       - name: Generate key
         run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} "cd /var/www/html/laravel-devops && php artisan key:generate"
 
-      - name: Restart Apache
-        run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} 'sudo systemctl restart apache2'
+      # - name: Restart Apache
+      #   run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} 'sudo systemctl restart apache2'
 
       # Optional: Create Database (if needed)
       # - name: Create Database
