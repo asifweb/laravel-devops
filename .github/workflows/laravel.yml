@@ -19,15 +19,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Copy files to Azure VM
-        run: |
-          rsync -avz --log-file=rsync.log --no-times -e "ssh -o StrictHostKeyChecking=no" ./ asifalvi@${{ secrets.AZURE_VM_IP }}:/var/www/html/laravel-devops
-
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2 # Use a stable version tag
-        with:
-          php-version: "7.4"
-
       - name: Cache Composer dependencies
         id: composer-cache
         uses: actions/cache@v3
@@ -40,22 +31,27 @@ jobs:
         if: steps.composer-cache.outputs.cache-hit != 'true'
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+
+      - name: Copy files to Azure VM
+        run: |
+          rsync -avz --log-file=rsync.log --delete --exclude 'vendor' --exclude '.git' -e "ssh -o StrictHostKeyChecking=no" ./ asifalvi@${{ secrets.AZURE_VM_IP }}:/var/www/html/laravel-devops
+
       - name: Copy .env
-        run: php -r "file_exists('.env') || copy('.env.example', '.env');"
+        run: |
+          ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} "if [ ! -f /var/www/html/laravel-devops/.env ]; then cp /var/www/html/laravel-devops/.env.example /var/www/html/laravel-devops/.env; fi"
 
       - name: Generate key
-        run: php artisan key:generate
+        run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} "cd /var/www/html/laravel-devops && php artisan key:generate"
 
       - name: Set directory permissions
-        run: chmod -R 777 storage bootstrap/cache
+        run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} "cd /var/www/html/laravel-devops && chmod -R 777 storage bootstrap/cache"
 
-      # - name: Install PHP and dependencies
-      #   run: |
-      #     ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} 'sudo apt-get update && sudo apt-get install -y php php-cli -S'
-
-      # - name: Restart Apache
-      #   run: |
-      #     ssh -o StrictHostKeyChecking=no ${{ secrets.AZURE_VM_USERNAME }}@${{ secrets.AZURE_VM_IP }} 'sudo systemctl restart apache2 -S'
+      - name: Restart Apache
+        run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} 'sudo systemctl restart apache2'
 
       # Optional: Create Database (if needed)
       # - name: Create Database
