@@ -44,11 +44,11 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} "if [ ! -f /var/www/html/laravel-devops/.env ]; then cp /var/www/html/laravel-devops/.env.example /var/www/html/laravel-devops/.env; fi"
 
-      - name: Generate key
-        run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} "cd /var/www/html/laravel-devops && php artisan key:generate"
-
       - name: Set directory permissions
         run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} "cd /var/www/html/laravel-devops && chmod -R 777 storage bootstrap/cache"
+
+      - name: Generate key
+        run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} "cd /var/www/html/laravel-devops && php artisan key:generate"
 
       - name: Restart Apache
         run: ssh -o StrictHostKeyChecking=no asifalvi@${{ secrets.AZURE_VM_IP }} 'sudo systemctl restart apache2'
